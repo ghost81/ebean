@@ -36,7 +36,7 @@ final class ImplicitReadOnlyTransaction implements SpiTransaction, TxnProfileEve
   /**
    * Set false when using autoCommit (as a performance optimisation for the read-only case).
    */
-  private final boolean useCommit;
+  private boolean useCommit;
   private final TransactionManager manager;
   private final SpiTxnLogger logger;
   private final boolean logSql;
@@ -200,7 +200,7 @@ final class ImplicitReadOnlyTransaction implements SpiTransaction, TxnProfileEve
   }
 
   @Override
-  public void registerDeleteBean(Integer persistingBean) {
+  public void registerDeleteBean(Class<?> type, Object id) {
     throw new IllegalStateException(notExpectedMessage);
   }
 
@@ -208,7 +208,7 @@ final class ImplicitReadOnlyTransaction implements SpiTransaction, TxnProfileEve
    * Return true if this is a bean that has already been saved/deleted.
    */
   @Override
-  public boolean isRegisteredDeleteBean(Integer persistingBean) {
+  public boolean isRegisteredDeleteBean(Class<?> type, Object id) {
     return false;
   }
 
@@ -548,6 +548,16 @@ final class ImplicitReadOnlyTransaction implements SpiTransaction, TxnProfileEve
   public void setRollbackOnly() {
     // expect AutoCommit so we can't really support rollbackOnly
     throw new IllegalStateException(notExpectedMessage);
+  }
+
+  @Override
+  public void setAutoCommitOnFindIterate() {
+    try {
+      connection.setAutoCommit(false);
+      useCommit = true;
+    } catch (SQLException e) {
+      throw new PersistenceException(e);
+    }
   }
 
   @Override

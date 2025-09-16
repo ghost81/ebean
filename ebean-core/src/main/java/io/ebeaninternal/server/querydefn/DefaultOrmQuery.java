@@ -1244,7 +1244,7 @@ public class DefaultOrmQuery<T> extends AbstractQuery implements SpiQuery<T> {
   public final HashQuery queryHash() {
     // calculateQueryPlanHash is called just after potential AutoTune tuning
     // so queryPlanHash is calculated well before this method is called
-    BindValuesKey bindKey = new BindValuesKey();
+    BindValuesKey bindKey = new BindValuesKey(server);
     queryBindKey(bindKey);
     return new HashQuery(queryPlanKey, bindKey);
   }
@@ -1895,7 +1895,7 @@ public class DefaultOrmQuery<T> extends AbstractQuery implements SpiQuery<T> {
   public final ExpressionList<T> text() {
     if (textExpressions == null) {
       useDocStore = true;
-      textExpressions = new DefaultExpressionList<>(this);
+      textExpressions = new DefaultExpressionList<>(this, true);
     }
     return textExpressions;
   }
@@ -1903,7 +1903,7 @@ public class DefaultOrmQuery<T> extends AbstractQuery implements SpiQuery<T> {
   @Override
   public final ExpressionList<T> where() {
     if (whereExpressions == null) {
-      whereExpressions = new DefaultExpressionList<>(this, null);
+      whereExpressions = new DefaultExpressionList<>(this, false);
     }
     return whereExpressions;
   }
@@ -1924,7 +1924,7 @@ public class DefaultOrmQuery<T> extends AbstractQuery implements SpiQuery<T> {
   @Override
   public final ExpressionList<T> having() {
     if (havingExpressions == null) {
-      havingExpressions = new DefaultExpressionList<>(this, null);
+      havingExpressions = new DefaultExpressionList<>(this, false);
     }
     return havingExpressions;
   }
